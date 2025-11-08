@@ -2,17 +2,27 @@
 
 import { motion } from "framer-motion"
 
+/**
+ * DataTable Component
+ * Reusable table component for displaying tabular data
+ * Used for attendance records, user lists, etc.
+ * 
+ * @param {Array<string>} headers - Array of column header names
+ * @param {Array<Array>} rows - 2D array of table data (rows of cells)
+ */
 export function DataTable({ headers, rows }) {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0 }} // Start invisible
+      animate={{ opacity: 1 }} // Fade in
+      transition={{ duration: 0.3 }} // 300ms animation
       className="overflow-x-auto rounded-lg border border-border"
     >
       <table className="w-full">
+        {/* Table Header */}
         <thead className="bg-muted border-b border-border">
           <tr>
+            {/* Map over headers array to create column headers */}
             {headers.map((header) => (
               <th key={header} className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                 {header}

@@ -2,12 +2,23 @@
 
 import { motion } from "framer-motion"
 
+/**
+ * StatCard Component
+ * Displays a statistics card with an icon, label, and value
+ * Used on the dashboard to show key metrics (employees, attendance, etc.)
+ * 
+ * @param {Component} Icon - Lucide icon component to display
+ * @param {string} label - Text label describing the statistic
+ * @param {string|number} value - The statistic value to display
+ * @param {string} color - Color theme (primary, success, warning, danger)
+ */
 export function StatCard({ icon: Icon, label, value, color = "primary" }) {
+  // Color mapping for different stat types
   const colorClasses = {
-    primary: "bg-blue-50 text-blue-600",
-    success: "bg-green-50 text-green-600",
-    warning: "bg-yellow-50 text-yellow-600",
-    danger: "bg-red-50 text-red-600",
+    primary: "bg-blue-50 text-blue-600",   // Blue for general stats
+    success: "bg-green-50 text-green-600", // Green for positive metrics
+    warning: "bg-yellow-50 text-yellow-600", // Yellow for warnings
+    danger: "bg-red-50 text-red-600",      // Red for critical metrics
   }
 
   return (

@@ -7,14 +7,23 @@ import { useSidebar } from "@/app/context/sidebar-context"
 import Link from "next/link"
 import { useState } from "react"
 
+/**
+ * Navbar Component
+ * Top navigation bar with logo, sidebar toggle, and user menu
+ * Fixed at the top of the page
+ */
 export function Navbar() {
-  const { user, logout } = useAuth()
-  const { toggle } = useSidebar()
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const { user, logout } = useAuth() // Get user info and logout function
+  const { toggle } = useSidebar() // Get sidebar toggle function
+  const [dropdownOpen, setDropdownOpen] = useState(false) // State for user dropdown menu
 
+  /**
+   * handleLogout Function
+   * Logs out the user and redirects to login page
+   */
   const handleLogout = () => {
-    logout()
-    window.location.href = "/"
+    logout() // Clear user data from auth context
+    window.location.href = "/" // Hard redirect to login page
   }
 
   return (
@@ -41,12 +50,8 @@ export function Navbar() {
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors"
           >
-            <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-white text-sm font-semibold">
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md">
               {user?.avatar || "U"}
-            </div>
-            <div className="text-sm">
-              <p className="font-medium text-foreground">{user?.name || "User"}</p>
-              <p className="text-xs text-muted-foreground">{user?.role || "Role"}</p>
             </div>
           </button>
 
@@ -55,20 +60,21 @@ export function Navbar() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg p-2"
+              className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg overflow-hidden"
             >
               <Link
                 href="/profile"
-                className="flex items-center gap-2 px-4 py-2 hover:bg-muted rounded-lg transition-colors text-sm"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors text-sm border-b border-border"
+                onClick={() => setDropdownOpen(false)}
               >
-                <User size={16} />
-                Profile
+                <User size={18} />
+                <span className="font-medium">My Profile</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-2 px-4 py-2 hover:bg-muted rounded-lg transition-colors text-sm text-red-600"
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors text-sm text-red-600"
               >
-                <LogOut size={16} />
+                <LogOut size={18} />
                 Logout
               </button>
             </motion.div>

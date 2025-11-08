@@ -2,38 +2,90 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { useAuth } from "@/app/context/auth-context"
 import { motion } from "framer-motion"
 
-const roles = [
-  { value: "Admin", label: "Admin" },
-  { value: "HR Officer", label: "HR Officer" },
-  { value: "Payroll Officer", label: "Payroll Officer" },
-  { value: "Employee", label: "Employee" },
-]
-
+/**
+ * Login Component
+ * Main login page where users authenticate with email, password, and role selection
+ */
 export default function Login() {
-  const router = useRouter()
-  const { login } = useAuth()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [selectedRole, setSelectedRole] = useState("Employee")
+  const router = useRouter() // Next.js router for navigation
+  const { login } = useAuth() // Get login function from auth context
+  
+  // Form state management
+  const [email, setEmail] = useState("") // Stores email input (Login ID)
+  const [password, setPassword] = useState("") // Stores password input
+  const [errors, setErrors] = useState({}) // Stores validation errors
+  const [isSubmitting, setIsSubmitting] = useState(false) // Loading state
 
+  /**
+   * validateLoginForm Function
+   * Validates all login form fields and returns errors object
+   * @returns {Object} errors - Object containing field-specific error messages
+   */
+  const validateLoginForm = () => {
+    const newErrors = {}
+
+    // Validate Login ID/Email
+    if (!email.trim()) {
+      newErrors.email = "Login ID or Email is required"
+    } else if (email.trim().length < 3) {
+      newErrors.email = "Login ID must be at least 3 characters"
+    }
+
+    // Validate Password
+    if (!password) {
+      newErrors.password = "Password is required"
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters"
+    } else if (password.length > 50) {
+      newErrors.password = "Password cannot exceed 50 characters"
+    }
+
+    return newErrors
+  }
+
+  /**
+   * handleLogin Function
+   * Processes login form submission and redirects to dashboard
+   * Role is automatically determined from the database based on email/login ID
+   * @param {Event} e - Form submit event
+   */
   const handleLogin = async (e) => {
-    e.preventDefault()
-    if (email && password) {
-      const userData = {
+    console.log("=== handleLogin called ===")
+    e.preventDefault() // Prevent default form submission
+    console.log("Form submission prevented")
+    setErrors({}) // Clear previous errors
+    
+    // Validate form fields
+    const validationErrors = validateLoginForm()
+    console.log("Validation errors:", validationErrors)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+
+    setIsSubmitting(true)
+    console.log("Calling login with:", { email, password: "***" })
+    
+    try {
+      // Call login function which will fetch user from JSON file
+      await login({
         email,
-        name: email.split("@")[0],
-        role: selectedRole,
-        avatar: email.charAt(0).toUpperCase(),
-      }
-      login(userData)
-      try {
-        await router.push("/dashboard")
-      } catch (error) {
-        console.error("Navigation error:", error)
-      }
+        loginId: email, // Allow login with either email or loginId
+        password,
+      })
+      
+      console.log("Login successful, navigating to dashboard")
+      // Navigate to dashboard on successful login
+      await router.push("/dashboard")
+    } catch (error) {
+      console.error("Login error:", error)
+      setErrors({ general: error.message || "Invalid credentials. Please try again." })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -55,56 +107,68 @@ export default function Login() {
           <h1 className="text-2xl font-bold text-center text-foreground mb-2">WorkZen</h1>
           <p className="text-center text-muted-foreground mb-8">HRMS Dashboard</p>
 
+          {/* General Error Message */}
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 text-sm">{errors.general}</p>
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Login ID/Email <span className="text-red-500">*</span>
+              </label>
               <input
-                type="email"
+                type="text"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-                required
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  if (errors.email) setErrors({ ...errors, email: "" })
+                }}
+                placeholder="your-login-id or email"
+                className={`w-full px-4 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 ${
+                  errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus:ring-accent"
+                }`}
               />
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Password</label>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Password <span className="text-red-500">*</span>
+              </label>
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  if (errors.password) setErrors({ ...errors, password: "" })
+                }}
                 placeholder="••••••••"
-                className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-                required
+                className={`w-full px-4 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 ${
+                  errors.password ? "border-red-500 focus:ring-red-500" : "border-border focus:ring-accent"
+                }`}
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Role</label>
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-              >
-                {roles.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
             </div>
 
             <button
               type="submit"
-              className="w-full bg-primary text-primary-foreground py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              disabled={isSubmitting}
+              className={`w-full bg-primary text-primary-foreground py-2 rounded-lg font-semibold transition-opacity ${
+                isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
+              }`}
             >
-              Login
+              {isSubmitting ? "SIGNING IN..." : "SIGN IN"}
             </button>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            Demo credentials: Use any email, password, and select a role
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Don't have an account?{" "}
+            <Link href="/signup" className="text-primary font-medium hover:underline">
+              Sign Up
+            </Link>
           </p>
         </div>
       </motion.div>

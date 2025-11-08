@@ -5,28 +5,27 @@ import { useAuth } from "@/app/context/auth-context"
 import { useSidebar } from "@/app/context/sidebar-context"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, Clock, Banknote, BarChart3, Settings } from "lucide-react"
+import { Building2, Users, Clock, Calendar, Banknote, BarChart3, Settings } from "lucide-react"
 
+// Main navigation menu items visible to all users
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: Users, label: "Employees", href: "/dashboard" },
   { icon: Clock, label: "Attendance", href: "/attendance" },
-  { icon: Clock, label: "Leave Management", href: "/leave" },
+  { icon: Calendar, label: "Time Off", href: "/leave" },
   { icon: Banknote, label: "Payroll", href: "/payroll" },
   { icon: BarChart3, label: "Reports", href: "/reports" },
+  { icon: Settings, label: "Settings", href: "/settings" },
 ]
 
+/**
+ * Sidebar Component
+ * Left navigation sidebar with company branding and menu items
+ * Shows/hides based on sidebar state and animates smoothly
+ */
 export function Sidebar() {
-  const { user } = useAuth()
-  const { isOpen } = useSidebar()
-  const pathname = usePathname()
-
-  const adminOnlyItems = [
-    { icon: Users, label: "Users", href: "/users" },
-    { icon: Settings, label: "Settings", href: "/settings" },
-  ]
-
-  const visibleAdminItems = user?.role === "Admin" ? adminOnlyItems : []
-  const allMenuItems = [...menuItems, ...visibleAdminItems]
+  const { user } = useAuth() // Get current user info to check role
+  const { isOpen } = useSidebar() // Get sidebar open/closed state
+  const pathname = usePathname() // Get current route to highlight active menu item
 
   return (
     <motion.aside
@@ -35,8 +34,26 @@ export function Sidebar() {
       transition={{ duration: 0.3 }}
       className="fixed left-0 top-16 bottom-0 w-64 bg-card border-r border-border shadow-sm overflow-y-auto z-30"
     >
+      {/* Company Logo and Name */}
+      <div className="p-6 border-b border-border">
+        <div className="flex items-center space-x-3">
+          {user?.logo ? (
+            <img src={user.logo} alt="Company Logo" className="w-12 h-12 rounded-lg object-cover" />
+          ) : (
+            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-primary-foreground" />
+            </div>
+          )}
+          <div>
+            <h2 className="font-bold text-foreground">{user?.companyName || "WorkZen"}</h2>
+            <p className="text-xs text-muted-foreground">{user?.role || "User"}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Menu */}
       <nav className="p-4 space-y-2">
-        {allMenuItems.map((item) => {
+        {menuItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
 

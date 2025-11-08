@@ -6,14 +6,29 @@ import { attendanceRecords } from "@/lib/mock-data"
 import { motion } from "framer-motion"
 import { useState } from "react"
 
+/**
+ * Attendance Page Component
+ * Displays employee attendance records in a table format
+ * Allows marking attendance with a button
+ */
 export default function Attendance() {
+  // State to store attendance records (initialized with mock data)
   const [records, setRecords] = useState(attendanceRecords)
+  
+  // State to toggle the "attendance marked" message
   const [markingAttendance, setMarkingAttendance] = useState(false)
 
+  // Table column headers
   const headers = ["Name", "Date", "Status", "Check-In", "Check-Out"]
+  
+  /**
+   * Map attendance records to table rows
+   * Each record becomes an array of values for the table
+   */
   const rows = records.map((record) => [
-    record.employeeName,
-    record.date,
+    record.employeeName, // Employee name
+    record.date, // Attendance date
+    // Status badge with color coding (green for Present, red for Absent)
     <span
       key={record.id}
       className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -22,10 +37,14 @@ export default function Attendance() {
     >
       {record.status}
     </span>,
-    record.checkIn || "-",
-    record.checkOut || "-",
+    record.checkIn || "-", // Check-in time (or "-" if not available)
+    record.checkOut || "-", // Check-out time (or "-" if not available)
   ])
 
+  /**
+   * handleMarkAttendance Function
+   * Toggles the attendance marking message (demo functionality)
+   */
   const handleMarkAttendance = () => {
     setMarkingAttendance(!markingAttendance)
   }
